@@ -1,0 +1,4 @@
+emoji==2.9.0
+textblob==0.17.1
+googletrans==4.0.0rc1
+nltk==3.7
