@@ -1,0 +1,6 @@
+{
+    "ConnectionStrings": {
+        "DefaultConnection": "Driver={ODBC Driver 17 for SQL Server};Server=(LocalDB)\\LocalDB_Gaza;Trusted_Connection=yes;",
+        "GazaDb": "Driver={ODBC Driver 17 for SQL Server};Server=(LocalDB)\\LocalDB_Gaza;Database=GazaSM_DB;Trusted_Connection=yes;"
+    }
+}

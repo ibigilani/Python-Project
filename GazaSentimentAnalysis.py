@@ -1,12 +1,18 @@
 import http.client
 import json
 import emoji
-from textblob import TextBlob
+import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
-import nltk
+from datetime import datetime
+import DatabaseAccess
+import visualization
+import schedule
+import time
+
 
 def getFeedBackId(api_key):
+    listOfIds=[]
     try:
         conn = http.client.HTTPSConnection("axesso-facebook-data-service.p.rapidapi.com")
         headers = {
@@ -32,8 +38,8 @@ def getFeedBackId(api_key):
             feedback = story.get("feedback") if story else None
             id = feedback.get("id") if feedback else None
             if isinstance(id, str):
-                return id
-        return None
+                listOfIds.append(id)
+        return listOfIds
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
@@ -58,13 +64,19 @@ def getComments(feedbackId,api_key):
             return list_of_comments
 
         comments_data = new_dict.get("comments", {}).get("data", {}).get("feedback", {}).get("display_comments", {}).get("edges", [])
+        
         for commentDict in comments_data:
             node = commentDict.get("node")
             preferred_body = node.get("preferred_body") if node else None
             text = preferred_body.get("text") if preferred_body else None
-            if text is not None:
-                list_of_comments.append(text)
+            created_time = node.get("created_time") if node else None
+            if text is not None and created_time is not None:
+                datetime_object = datetime.utcfromtimestamp(created_time)
+                formatted_datetime = datetime_object.strftime('%Y-%m-%d %H:%M:%S')
+                list_of_comments.append((text, formatted_datetime))
+            
         return list_of_comments
+    
     except Exception as e:
         print(f"An error occurred: {e}")
         return list_of_comments
@@ -78,15 +90,10 @@ def translate_to_english(text):
     return translation.text
 
 def get_sentiment(text):
-    # TextBlob sentiment analysis (it works for basic English text)
-    blob = TextBlob(text)
-    polarity = blob.sentiment.polarity  # -1 to 1 where 1 means positive sentiment
-
     # VADER sentiment analysis (more suited for social media texts, English only)
     sia = SentimentIntensityAnalyzer()
     sentiment_score = sia.polarity_scores(text)
-    
-    return polarity, sentiment_score
+    return sentiment_score
 
 def setup_nltk():
     # Check if vader_lexicon is already downloaded
@@ -96,17 +103,35 @@ def setup_nltk():
         # Download it if not present
         nltk.download('vader_lexicon')
 
-setup_nltk()
-fId = getFeedBackId("8b08ebd98emsh5da1790990b14d7p11566bjsnc7b22e897d4d")
-listOfComments = getComments(fId,"8b08ebd98emsh5da1790990b14d7p11566bjsnc7b22e897d4d")
-lisOfSentiments = []
+def main():
+    setup_nltk()
+    listOf_FIds = getFeedBackId("2c2f7defb1msh9caa0876ba84604p142418jsnf8b0837da372")
+    
+    for id in listOf_FIds:
+        # Check if the feedback ID already exists in the database
+        existing_id = DatabaseAccess.get_from_feedbackIds(id)
 
-for comment in listOfComments:
-    comment = convert_emojis_to_text(comment)
-    comment = translate_to_english(comment)
-    sentiment = get_sentiment(comment)
-    lisOfSentiments.append(sentiment)
+        if not existing_id:
+            lisOfSentiments = []
 
-for x in lisOfSentiments:
-    print(x)
+            DatabaseAccess.insert_into_feedbackIds(id)
+            fID = DatabaseAccess.get_from_feedbackIds(id)
 
+            listOfComments = getComments(id, "2c2f7defb1msh9caa0876ba84604p142418jsnf8b0837da372")
+
+            for comment in listOfComments:
+                OG_comment = comment[0]
+                date = comment[1]
+                emojis_converted_comment = convert_emojis_to_text(OG_comment)
+                translated_comment = translate_to_english(emojis_converted_comment)
+                sentiment = get_sentiment(translated_comment)
+                lisOfSentiments.append((translated_comment, date, sentiment.get('compound')))
+
+            for senty in lisOfSentiments:
+                DatabaseAccess.insert_into_sentiments(senty[1], senty[2], senty[0], fID)
+
+    s_list= DatabaseAccess.get_all_sentiments()
+    visualization.showReport(s_list)
+  
+if __name__ == "__main__":
+    main()
