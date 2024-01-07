@@ -6,7 +6,7 @@ Ibrahim Gilani
 
 ## Overview
 
-The Facebook Sentiment Analysis App is a Python application designed to retrieve and analyze comments on Facebook posts containing the hashtag #Gaza. The primary objective of the app is to gauge public sentiment regarding the ongoing events in Palestine, particularly the Gaza region. By analyzing the comments associated with these posts, the app aims to provide insights into the emotions and opinions expressed by Facebook users.
+The Facebook Sentiment Analysis App is a Python application designed to retrieve and analyze comments on Facebook posts containing the hashtag #Gaza. The primary objective of the app is to gauge public sentiment regarding the current Genocide in Palestine. By analyzing the comments associated with these posts, the app aims to provide insights into the emotions and opinions expressed by Facebook users.
 
 ## Technologies Used
 
