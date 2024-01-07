@@ -132,8 +132,8 @@ def main():
             for sentiment_data in sentiments:
                 DatabaseAccess.insert_into_sentiments(sentiment_data[1], sentiment_data[2], sentiment_data[0], feedback_id_in_db)
 
-    # sentiment_list = DatabaseAccess.get_all_sentiments()
-    # visualization.showReport(sentiment_list)
+    sentiment_list = DatabaseAccess.get_all_sentiments()
+    visualization.showReport(sentiment_list)
   
 if __name__ == "__main__":
     main()

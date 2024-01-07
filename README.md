@@ -66,6 +66,7 @@ Please note that you need to configure the database connection by providing the 
 
 The sentiment analysis results are based on text analysis and may not represent the complete sentiments of users. Use the app's insights responsibly and consider the context and limitations of sentiment analysis.
 
-
+## Example Data Visualization
+![Alt text](image.png)
 
 
